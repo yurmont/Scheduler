@@ -8,9 +8,8 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using System.IO;
-using Quartz.Impl.Matchers;
 using Quartz.Plugins.RecentHistory;
+using System.IO;
 
 #region Target-Specific Directives
 #if NETSTANDARD

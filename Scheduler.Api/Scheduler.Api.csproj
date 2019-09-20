@@ -3,11 +3,22 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <UserSecretsId>626fcd27-9a81-4234-be12-de9e521a7c81</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.4.10" />
+    <PackageReference Include="MySql.Data" Version="8.0.17" />
+    <PackageReference Include="Quartz" Version="3.0.7" />
+    <PackageReference Include="Quartz.Serialization.Json" Version="3.0.7" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="4.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Scheduler.Job\Scheduler.Job.csproj" />
   </ItemGroup>
 
 </Project>

@@ -16,8 +16,6 @@ namespace AspNetCoreDocker
             var scheduler = GetScheduler().Result;
             //var scheduler = DemoScheduler.Create().Result;
 
-
-
             scheduler.Start();
 
             var host = WebHost.CreateDefaultBuilder(args).Configure(app => 

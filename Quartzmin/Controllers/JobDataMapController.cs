@@ -1,5 +1,4 @@
 ﻿using Quartzmin.Helpers;
-using Quartzmin.Models;
 using Quartzmin.TypeHandlers;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
@@ -16,7 +15,7 @@ using Microsoft.AspNetCore.Http.Features;
 #if NETFRAMEWORK
 using System.Web.Http;
 using IActionResult = System.Web.Http.IHttpActionResult;
-using System.Web.Http.Results;
+
 #endif
 #endregion
 

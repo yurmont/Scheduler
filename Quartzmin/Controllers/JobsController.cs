@@ -25,6 +25,11 @@ namespace Quartzmin.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
+            //var job = JobBuilder.Create<DisallowConcurrentJob>()
+            //    .WithIdentity("Load CSV", "IMPORT")
+            //    .StoreDurably()
+            //    .Build();
+
             var keys = (await Scheduler.GetJobKeys(GroupMatcher<JobKey>.AnyGroup())).OrderBy(x => x.ToString());
             var list = new List<JobListItem>();
             var knownTypes = new List<string>();
@@ -63,8 +68,7 @@ namespace Quartzmin.Controllers
             job.GroupList = (await Scheduler.GetJobGroupNames()).GroupArray();
             job.Group = SchedulerConstants.DefaultGroup;
             job.TypeList = new List<string> {
-                "Quartzmin.DemoScheduler+DisallowConcurrentJob, Scheduler.WebApp",
-                "Quartzmin.DemoScheduler+DummyJob, Scheduler.WebApp" };
+                "Scheduler.Job.DummyJob,Scheduler.Job"};
 
             return View("Edit", new JobViewModel() { Job = job, DataMap = jobDataMap });
         }
