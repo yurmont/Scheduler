@@ -68,7 +68,10 @@ namespace Quartzmin.Controllers
             job.GroupList = (await Scheduler.GetJobGroupNames()).GroupArray();
             job.Group = SchedulerConstants.DefaultGroup;
             job.TypeList = new List<string> {
-                "Scheduler.Job.DummyJob,Scheduler.Job"};
+                "Scheduler.Job.DummyJob,Scheduler.Job",
+                "Scheduler.Job.SendMailJob,Scheduler.Job",
+                "Scheduler.Job.PostRequestJob,Scheduler.Job"
+            };
 
             return View("Edit", new JobViewModel() { Job = job, DataMap = jobDataMap });
         }
