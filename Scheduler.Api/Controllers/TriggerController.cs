@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Quartz;
@@ -30,68 +31,69 @@ namespace Scheduler.Api.Controllers
             if (trigger == null)  return NotFound();
 
             var triggerType = trigger.GetTriggerType();
-            TriggerViewModel triggerViewModel = null;
+            TriggerViewModel model = null;
 
             switch (triggerType)
             {
                 case TriggerType.Cron:
-                    triggerViewModel = CronTriggerViewModel.FromTrigger((ICronTrigger) trigger);
+                    model = CronTriggerViewModel.FromTrigger((ICronTrigger) trigger);
                     break;
                 case TriggerType.Simple:
-                    triggerViewModel = SimpleTriggerViewModel.FromTrigger((ISimpleTrigger) trigger);
+                    model = SimpleTriggerViewModel.FromTrigger((ISimpleTrigger) trigger);
                     break;
                 case TriggerType.Daily:
-                    triggerViewModel = DailyTriggerViewModel.FromTrigger((IDailyTimeIntervalTrigger) trigger);
+                    model = DailyTriggerViewModel.FromTrigger((IDailyTimeIntervalTrigger) trigger);
                     break;
                 case TriggerType.Calendar:
-                    triggerViewModel = CalendarTriggerViewModel.FromTrigger((ICalendarIntervalTrigger) trigger);
+                    model = CalendarTriggerViewModel.FromTrigger((ICalendarIntervalTrigger) trigger);
                     break;
                 default:
                     throw new ApplicationException($"Trigger type {triggerType} does not exist.");
             }
 
-            triggerViewModel.TriggerName = trigger.Key.Name;
-            triggerViewModel.JobName = trigger.JobKey.Name;
-            triggerViewModel.ProjectName = trigger.Key.Group;
-            triggerViewModel.StartTimeUtc = trigger.StartTimeUtc.UtcDateTime.ToDefaultFormat();
-            triggerViewModel.EndTimeUtc = trigger.EndTimeUtc?.UtcDateTime.ToDefaultFormat();
-            triggerViewModel.CalendarName = trigger.CalendarName;
-            triggerViewModel.Description = trigger.Description;
-            triggerViewModel.Priority = trigger.Priority;
-            triggerViewModel.MisfireInstruction = trigger.MisfireInstruction;
+            model.TriggerName = trigger.Key.Name;
+            model.JobName = trigger.JobKey.Name;
+            model.ProjectName = trigger.Key.Group;
+            model.StartTimeUtc = trigger.StartTimeUtc.UtcDateTime.ToDefaultFormat();
+            model.EndTimeUtc = trigger.EndTimeUtc?.UtcDateTime.ToDefaultFormat();
+            model.CalendarName = trigger.CalendarName;
+            model.Description = trigger.Description;
+            model.Priority = trigger.Priority;
+            model.MisfireInstruction = trigger.MisfireInstruction;
+            model.JobDataMap = trigger.JobDataMap.WrappedMap;
 
-            return Ok(triggerViewModel);
+            return Ok(model);
         }
 
         [HttpPost]
         [Route("cron")]
-        public async void Create([FromBody] CronTriggerViewModel model)
+        public async Task<IActionResult> Create([FromBody] CronTriggerViewModel model)
         {
-            await CreateTrigger(model);
+            return await CreateTrigger(model);
         }
 
         [HttpPost]
         [Route("simple")]
-        public async void Create([FromBody] SimpleTriggerViewModel model)
+        public async Task<IActionResult> Create([FromBody] SimpleTriggerViewModel model)
         {
-            await CreateTrigger(model);
+            return await CreateTrigger(model);
         }
 
         [HttpPost]
         [Route("daily")]
-        public async void Create([FromBody] DailyTriggerViewModel model)
+        public async Task<IActionResult> Create([FromBody] DailyTriggerViewModel model)
         {
-            await CreateTrigger(model);
+            return await CreateTrigger(model);
         }
        
         [HttpPost]
         [Route("calendar")]
-        public async void Create([FromBody] CalendarTriggerViewModel model)
+        public async Task<IActionResult> Create([FromBody] CalendarTriggerViewModel model)
         {
-            await CreateTrigger(model);
+            return await CreateTrigger(model);
         }
 
-        private async Task CreateTrigger(TriggerViewModel model)
+        private async Task<IActionResult> CreateTrigger(TriggerViewModel model)
         {
             var triggerModel = model;
 
@@ -116,12 +118,23 @@ namespace Scheduler.Api.Controllers
                     await _scheduler.AddJob(jobBuilder, replace: false);
                 }
 
+                var existingTrigger = await _scheduler
+                    .GetTrigger(new TriggerKey(model.TriggerName, model.ProjectName))
+                    .ConfigureAwait(false);
+
+                if (existingTrigger != null)
+                {
+                    return Conflict($"Trigger with name {model.TriggerName} and project {model.ProjectName} already exists.");
+                }
+
                 var builder = triggerModel.CreateBuilder();
 
                 var trigger = builder.Build();
 
                 await _scheduler.ScheduleJob(trigger);
             }
+
+            return Ok();
         }
 
         private bool EnsureValidKey(string name, string group) => !(string.IsNullOrEmpty(name) || string.IsNullOrEmpty(group));

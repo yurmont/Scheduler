@@ -28,7 +28,7 @@ namespace Scheduler.Api.Controllers
 
             if (jobDetail == null) return NotFound();
 
-            var jobViewModel = new JobViewModel
+            var model = new JobViewModel
             {
                 JobName = jobDetail.Key.Name,
                 ProjectName = jobDetail.Key.Group,
@@ -37,7 +37,7 @@ namespace Scheduler.Api.Controllers
                 JobDataMap = jobDetail.JobDataMap.WrappedMap
             };
 
-            return Ok(jobViewModel);
+            return Ok(model);
         }
 
         [HttpPost]
